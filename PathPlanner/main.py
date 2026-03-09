@@ -62,30 +62,32 @@ def main(args=None):
     prm.construct_roadmap()
     path_prm = prm.plan()
 
-    # Interpolate the path for smoothness
-    path_interpolated = traj_generator.path_interpolation(path, graph, lattice_cell_size, 10)
+    if path:
+        # Interpolate the path for smoothness
+        path_interpolated = traj_generator.path_interpolation(path, graph, lattice_cell_size, 10)
 
-    # Resample the interpolated path to generate a trajectory
-    result = traj_generator.resample_path(path_interpolated)
+        # Resample the interpolated path to generate a trajectory
+        result = traj_generator.resample_path(path_interpolated)
 
-    # Print the number of states in the trajectory
-    print("trajectory length = ", len(result.states))
+        # Print the number of states in the trajectory
+        print("trajectory length = ", len(result.states))
 
-    # Visualization section
-    # Plot the time-velocity curve 
-    v = []
-    for i in range(len(result.states)):
-        v.append(result.states[i].v)
-    plt.plot(v)
+        # Visualization section
+        # Plot the trajectory
+        x = []
+        y = []
+        for i in range(len(result.states)):
+            x.append(result.states[i].x)  
+            y.append(result.states[i].y) 
+        # Plot the time-velocity curve 
+        v = []
+        for i in range(len(result.states)):
+            v.append(result.states[i].v)
+        plt.plot(v)
+        plt.plot(y, x, color='green', linewidth=2.0)  
 
     # Plot the obstacle map and trajectory
     fig = plot_map(obs_plot, graph, lattice_cell_size)
-    x = []
-    y = []
-    for i in range(len(result.states)):
-        x.append(result.states[i].x)  
-        y.append(result.states[i].y) 
-    plt.plot(y, x, color='green', linewidth=2.0)  
     plt.show()
 
 if __name__ == '__main__':
