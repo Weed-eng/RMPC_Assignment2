@@ -88,6 +88,7 @@ class LatticeGraph:
                     # top row
                     if (row - 1) >= 0 and angle == 90:
                         v_top = (row - 1, col, 90)
+                        self._graph.set_edge(v, v_top, 1)
 
                     if (col - 1) >= 0 and (row - 1) >= 0 and angle == 90:
                         v_top_left = (row - 1, col - 1, 180)
@@ -97,7 +98,7 @@ class LatticeGraph:
                         v_top_right = (row - 1, col + 1, 0)
                         self._graph.set_edge(v, v_top_right, np.pi)
 
-                    # buttom row
+                    # bottom row
                     if (row + 1) < n_rows and angle == 270:
                         v_buttom = (row + 1, col, 270)
                         self._graph.set_edge(v, v_buttom, 1)
@@ -137,7 +138,7 @@ class LatticeGraph:
                         self._graph.set_edge(v, v_right_down, np.pi)
 
         # arcs
-        npoints = int(lattice_cell_size * np.pi / 2 )
+        npoints = int(lattice_cell_size * np.pi / 2)
         pts_0_to_90 = np.zeros((2, npoints))
         for i in range(npoints):
             x = np.cos(float(i) / float(npoints - 1) * np.pi / 2) * lattice_cell_size - lattice_cell_size
@@ -148,7 +149,7 @@ class LatticeGraph:
         self.arc_primitives[(0, 90)] = pts_0_to_90
 
         pts_0_to_270 = np.zeros((2, npoints))
-        pts_0_to_270[0, :] = -1*pts_0_to_90[0, :]
+        pts_0_to_270[0, :] = -1 * pts_0_to_90[0, :]
         pts_0_to_270[1, :] = pts_0_to_90[1, :]
         self.arc_primitives[(0, 270)] = pts_0_to_270
 
@@ -164,7 +165,7 @@ class LatticeGraph:
 
         pts_90_to_0 = np.zeros((2, npoints))
         pts_90_to_0[0, :] = pts_90_to_180[0, :]
-        pts_90_to_0[1, :] = -1*pts_90_to_180[1, :]
+        pts_90_to_0[1, :] = -1 * pts_90_to_180[1, :]
         self.arc_primitives[(90, 0)] = pts_90_to_0
 
         pts_180_to_270 = np.zeros((2, npoints))
@@ -173,7 +174,7 @@ class LatticeGraph:
         self.arc_primitives[(180, 270)] = pts_180_to_270
 
         pts_270_to_0 = np.zeros((2, npoints))
-        pts_270_to_0[0, :] = -1*np.flip(pts_180_to_270[0, :]) + lattice_cell_size
+        pts_270_to_0[0, :] = -1 * np.flip(pts_180_to_270[0, :]) + lattice_cell_size
         pts_270_to_0[1, :] = np.flip(pts_180_to_270[1, :]) + lattice_cell_size
         self.arc_primitives[(270, 0)] = pts_270_to_0
 
@@ -181,6 +182,7 @@ class LatticeGraph:
         pts_180_to_90[0, :] = np.flip(pts_270_to_0[0, :]) - lattice_cell_size
         pts_180_to_90[1, :] = np.flip(pts_270_to_0[1, :]) - lattice_cell_size
         self.arc_primitives[(180, 90)] = pts_180_to_90
+
 
 class Astar:
     def solve_astar(self, s, g, graph_vert_list, adjacency_matrix, edge_dict):
@@ -203,11 +205,46 @@ class Astar:
         parent_node = dict()
         distances = dict()
         costs = dict()
-        open_set.put((0, s))
-        # TODO: Implement A* algorithm logic
-        # YOUR CODE STARTS HERE
-        pass   
-        # YOUR CODE ENDS HERE
+
+        for v in graph_vert_list:
+            distances[v] = np.inf
+            costs[v] = np.inf
+
+        distances[s] = 0
+        costs[s] = self.calH(s, g)
+        open_set.put((costs[s], s))
+
+        while not open_set.empty():
+            current_cost, u = open_set.get()
+
+            if u in closed_set:
+                continue
+
+            if u == g:
+                return self.traverse_path(s, g, parent_node)
+
+            closed_set.add(u)
+
+            neighbors = self.get_neighbor(u, graph_vert_list, adjacency_matrix)
+
+            for v in neighbors:
+                if v in closed_set:
+                    continue
+
+                expand_cost = self.cal_expand_cost(u, v, edge_dict)
+
+                if expand_cost == np.inf:
+                    continue
+
+                tentative_g = distances[u] + expand_cost
+
+                if tentative_g < distances[v]:
+                    distances[v] = tentative_g
+                    costs[v] = tentative_g + self.calH(v, g)
+                    parent_node[v] = u
+                    open_set.put((costs[v], v))
+
+        return []
 
     def traverse_path(self, s, g, parent_node):
         """
@@ -221,13 +258,19 @@ class Astar:
         Returns:
             list: Path from start to goal.
         """
-        # TODO: Implement logic to backtrack from goal to start using parent_node
-        # YOUR CODE STARTS HERE
-        pass
-        # YOUR CODE ENDS HERE
+        path = [g]
+        current = g
+
+        while current != s:
+            if current not in parent_node:
+                return []
+            current = parent_node[current]
+            path.append(current)
+
+        path.reverse()
+        return path
 
     def get_neighbor(self, u, graph_vert_list, adjacency_matrix):
-
         row = graph_vert_list.index(u)
         is_adj = (adjacency_matrix[row, :] < np.inf) & (adjacency_matrix[row, :] > 0)
 
@@ -250,10 +293,7 @@ class Astar:
         Returns:
             float: Cost of expansion.
         """
-        # TODO: Return the expansion cost
-        # YOUR CODE STARTS HERE
-        pass
-        # YOUR CODE ENDS HERE
+        return edge_dict.get((v1, v2), np.inf)
 
     def calH(self, v1, v2):
         """
@@ -266,7 +306,6 @@ class Astar:
         Returns:
             float: Heuristic cost.
         """
-        # TODO: Return the heuristic cost
-        # YOUR CODE STARTS HERE
-        pass
-        # YOUR CODE ENDS HERE
+        row1, col1, _ = v1
+        row2, col2, _ = v2
+        return np.sqrt((row1 - row2) ** 2 + (col1 - col2) ** 2)
