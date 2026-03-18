@@ -21,13 +21,12 @@ def main(args=None):
     scaler = 3.0
     graph.initialise_graph(n_rows=n_rows, n_cols=n_cols, lattice_cell_size=lattice_cell_size)
 
-    # ✅ Keep correct formats
     s_3d = (1, 8, 90)
     g_3d = (8, 2, 270)
 
-    # ❗ FIXED: RRT/PRM require 2D (even if unused visually)
-    s_2d = (1, 8)
-    g_2d = (8, 2)
+    # RRT/PRM use 2D positions only, so heading is removed
+    s_2d = (1, 8)   # CHANGED
+    g_2d = (8, 2)   # CHANGED
 
     obs = ObstaclesGrid(map_size=(n_rows * lattice_cell_size, n_cols * lattice_cell_size))
     obs_plot = ObstaclesGrid(map_size=(int(n_rows * lattice_cell_size / scaler), int(n_cols * lattice_cell_size / scaler)))
@@ -46,15 +45,12 @@ def main(args=None):
 
     graph.update_obstacles(obs)
 
-    # Lattice planner (this is what matters)
     path = graph.solve(s_3d, g_3d, graph._graph._vert_list, graph._graph._adjacency_matrix, graph._graph._edge_dict)
 
-    # RRT + PRM still run (but NOT plotted)
     rrt = RRTPlanner(s_2d, g_2d, map_size, obs)
     path_rrt = rrt.plan()
 
     prm = PRMPlanner(s_2d, g_2d, map_size, obs)
-    prm.construct_roadmap()
     path_prm = prm.plan()
 
     if path:
@@ -71,15 +67,34 @@ def main(args=None):
             y.append(result.states[i].y)
             v.append(result.states[i].v)
 
-        # ✅ Proper separation of plots (small improvement)
-        plt.figure()
-        plt.plot(v)
-        plt.title("Velocity Profile")
+        # FIX 2: Separate velocity plot into its own figure
+        plt.figure()  # CHANGED
+        plt.plot(v, linewidth=2.0)  # CHANGED
+        plt.xlabel("Sample")  # ADDED
+        plt.ylabel("Velocity")  # ADDED
+        plt.title("Velocity Profile")  # ADDED
+        plt.grid(True)  # ADDED
 
-        plt.figure()
-        plot_map(obs_plot, graph, lattice_cell_size)
-        plt.plot(y, x, color='green', linewidth=2.0)
-        plt.title("Obstacle Map and Lattice Trajectory")
+        # FIX 3: Plot trajectory ON TOP of obstacle map (not separately)
+        plot_map(obs_plot, graph, lattice_cell_size)  # MOVED BEFORE trajectory plot
+
+        # FIX 4: Plot trajectory AFTER map so it overlays correctly
+        plt.plot(y, x, color='green', linewidth=2.0, label='Lattice trajectory')  # CHANGED
+
+        # FIX 5: Properly plot RRT path (scaled + dashed)
+        if path_rrt:
+            rrt_x = [p[0] / lattice_cell_size for p in path_rrt]
+            rrt_y = [p[1] / lattice_cell_size for p in path_rrt]
+            plt.plot(rrt_y, rrt_x, 'r--', linewidth=1.5, label='RRT path')  # ADDED
+
+        # FIX 6: Properly plot PRM path
+        if path_prm:
+            prm_x = [p[0] / lattice_cell_size for p in path_prm]
+            prm_y = [p[1] / lattice_cell_size for p in path_prm]
+            plt.plot(prm_y, prm_x, 'm--', linewidth=1.5, label='PRM path')
+
+        plt.legend()  # ADDED
+        plt.title("Obstacle Map and Planned Paths")  # ADDED
 
     plt.show()
 
