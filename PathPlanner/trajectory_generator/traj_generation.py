@@ -70,7 +70,7 @@ class TrajGenerator:
         # Prepare for 1D interpolation
         prev_x = [p[0] for p in path]
         prev_y = [p[1] for p in path]
-        prev_theta = [p[2] for p in path]
+        prev_theta = [np.deg2rad(p[2]) for p in path]
 
         result.tf = interpolated_ticks[-1]
         interp_x = self.interpolate_1d(time_profile, prev_x, interpolated_ticks)
@@ -98,10 +98,8 @@ class TrajGenerator:
             dtheta = self.normalize_angle(result.states[i].theta - result.states[i - 1].theta)
 
             result.states[i].v = min(np.hypot(dx, dy) / dt, max_velocity)
-            result.states[i].omega = max(
-                -max_omega_vel,
-                min(max_omega_vel, dtheta / dt)
-            )
+            omega = dtheta / dt
+            result.states[i].omega = np.clip(omega, -max_omega_vel, max_omega_vel)
 
         if nfe > 1:
             result.states[0].v = result.states[1].v
