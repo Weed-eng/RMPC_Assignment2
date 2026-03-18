@@ -24,7 +24,7 @@ def main(args=None):
     s_3d = (1, 8, 90)
     g_3d = (8, 2, 270)
 
-    # 🔥 FIX 1: RRT/PRM should use 2D (x, y) not (row, col, angle)
+    # RRT/PRM use 2D positions only, so heading is removed
     s_2d = (1, 8)   # CHANGED
     g_2d = (8, 2)   # CHANGED
 
@@ -67,7 +67,7 @@ def main(args=None):
             y.append(result.states[i].y)
             v.append(result.states[i].v)
 
-        # 🔥 FIX 2: Separate velocity plot into its own figure
+        # FIX 2: Separate velocity plot into its own figure
         plt.figure()  # CHANGED
         plt.plot(v, linewidth=2.0)  # CHANGED
         plt.xlabel("Sample")  # ADDED
@@ -75,23 +75,23 @@ def main(args=None):
         plt.title("Velocity Profile")  # ADDED
         plt.grid(True)  # ADDED
 
-        # 🔥 FIX 3: Plot trajectory ON TOP of obstacle map (not separately)
+        # FIX 3: Plot trajectory ON TOP of obstacle map (not separately)
         plot_map(obs_plot, graph, lattice_cell_size)  # MOVED BEFORE trajectory plot
 
-        # 🔥 FIX 4: Plot trajectory AFTER map so it overlays correctly
+        # FIX 4: Plot trajectory AFTER map so it overlays correctly
         plt.plot(y, x, color='green', linewidth=2.0, label='Lattice trajectory')  # CHANGED
 
-        # 🔥 FIX 5: Properly plot RRT path (scaled + dashed)
+        # FIX 5: Properly plot RRT path (scaled + dashed)
         if path_rrt:
-            rrt_x = [p[0] / scaler for p in path_rrt]  # ADDED
-            rrt_y = [p[1] / scaler for p in path_rrt]  # ADDED
+            rrt_x = [p[0] / lattice_cell_size for p in path_rrt]
+            rrt_y = [p[1] / lattice_cell_size for p in path_rrt]
             plt.plot(rrt_y, rrt_x, 'r--', linewidth=1.5, label='RRT path')  # ADDED
 
-        # 🔥 FIX 6: Properly plot PRM path
+        # FIX 6: Properly plot PRM path
         if path_prm:
-            prm_x = [p[0] / scaler for p in path_prm]  # ADDED
-            prm_y = [p[1] / scaler for p in path_prm]  # ADDED
-            plt.plot(prm_y, prm_x, 'm--', linewidth=1.5, label='PRM path')  # ADDED
+            prm_x = [p[0] / lattice_cell_size for p in path_prm]
+            prm_y = [p[1] / lattice_cell_size for p in path_prm]
+            plt.plot(prm_y, prm_x, 'm--', linewidth=1.5, label='PRM path')
 
         plt.legend()  # ADDED
         plt.title("Obstacle Map and Planned Paths")  # ADDED
