@@ -76,7 +76,6 @@ def main(args=None):
         plt.plot(v)
         plt.title("Velocity Profile")
 
-        plt.figure()
         plot_map(obs_plot, graph, lattice_cell_size)
         plt.plot(y, x, color='green', linewidth=2.0)
         plt.title("Obstacle Map and Lattice Trajectory")
