@@ -26,8 +26,8 @@ def main(args=None):
     g_3d = (8, 2, 270)
 
     # RRT / PRM use 2D positions only
-    s_2d = (1, 8)
-    g_2d = (8, 2)
+    s_2d = (8 * lattice_cell_size, 1 * lattice_cell_size)   # (x, y) = (80, 10)
+    g_2d = (2 * lattice_cell_size, 8 * lattice_cell_size)   # (x, y) = (20, 80)
 
     obs = ObstaclesGrid(map_size=(n_rows * lattice_cell_size, n_cols * lattice_cell_size))
     obs_plot = ObstaclesGrid(
@@ -102,14 +102,14 @@ def main(args=None):
         if path_rrt is not None and len(path_rrt) > 0:
             rrt_x = [p[0] / scaler for p in path_rrt]
             rrt_y = [p[1] / scaler for p in path_rrt]
-            plt.plot(rrt_y, rrt_x, 'r--', linewidth=1.5, label='RRT path')
+            plt.plot(rrt_x, rrt_y, 'r--', linewidth=1.5, label='RRT path')
 
         # PRM path
         if path_prm is not None and len(path_prm) > 0:
             prm_x = [p[0] / scaler for p in path_prm]
             prm_y = [p[1] / scaler for p in path_prm]
-            plt.plot(prm_y, prm_x, 'm--', linewidth=1.5, label='PRM path')
-
+            plt.plot(prm_x, prm_y, 'm--', linewidth=1.5, label='PRM path')
+    
         plt.title("Obstacle Map and Planned Paths")
         plt.legend()
 
