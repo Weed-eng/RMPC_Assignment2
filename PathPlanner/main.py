@@ -26,8 +26,8 @@ def main(args=None):
     g_3d = (8, 2, 270)
 
     # RRT / PRM use 2D positions only
-    s_2d = (8 * lattice_cell_size, 1 * lattice_cell_size)   # (x, y) = (80, 10)
-    g_2d = (2 * lattice_cell_size, 8 * lattice_cell_size)   # (x, y) = (20, 80)
+    s_2d = (8 * lattice_cell_size, 1 * lattice_cell_size)   
+    g_2d = (2 * lattice_cell_size, 8 * lattice_cell_size)   
 
     obs = ObstaclesGrid(map_size=(n_rows * lattice_cell_size, n_cols * lattice_cell_size))
     obs_plot = ObstaclesGrid(
