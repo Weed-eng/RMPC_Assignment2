@@ -52,8 +52,9 @@ class RRTPlanner:
             if new_node and not self.is_colliding(new_node, nearest_node): 
                 self.tree.append(new_node)
 
-                if self.reached_goal(new_node):  
-                    goal_node = Node(self.goal.x, self.goal.y, parent=new_node)
+            if self.reached_goal(new_node):
+                goal_node = Node(self.goal.x, self.goal.y, parent=new_node)
+                if not self.is_colliding(goal_node, new_node):
                     return self.construct_path(goal_node) 
         
         print("Path not found.")
