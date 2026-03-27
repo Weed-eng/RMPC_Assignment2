@@ -147,8 +147,11 @@ class RRTPlanner:
             x = nearest_node.x + t * dx
             y = nearest_node.y + t * dy
 
-            if not self.obstacles.is_point_valid((int(x), int(y))):
+            xi = int(round(x))
+            yi = int(round(y))
+            if not self.obstacles.is_point_valid((xi, yi)):
                 return True
+                
 
         return False
 
